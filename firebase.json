@@ -1,0 +1,10 @@
+{
+  "hosting": {
+    "public": "chefguard-admin",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+.btn-red{
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+.btn-red:hover{
+    background-color: #dc3545 !important;
+    /* opacity: 0.9; */
+
+}
+
+.badge{
+    margin-top: 16px;
+}
+.edit:hover{
+cursor: pointer;
+}
+
+.delete:hover{
+    cursor: pointer;
+}
+
+table .additional-css-class{
+    flex-direction: column;
+    align-items: center;
+}
+
+.modal-body .additional-css-class #goo-loader{
+    margin-left: 40%;
+    margin-top: 28%;
+}
+
+
+.capitalize{
+    text-transform: capitalize;
+}
+
+/* .ellipse{
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+    width: 200px;
+} */
