@@ -38,6 +38,9 @@ function CategoryPage() {
   const [imagePreviews, setImagePreviews] = useState(null);
   const [show, setShow] = useState(false);
   const [deleteCategory,setDeleteCategory] = useState('')
+  const [searchTerm, setSearchTerm] = useState('');
+
+
   const handleEditCategory = (categoryId) => {
     console.log("category id",{categoryId})
     if(!categoryId) return;
@@ -131,6 +134,15 @@ return categoryList;
       console.log(err)
     }
   };
+
+  const handleSearchChange = (event) => {
+    console.log("entered")
+    setSearchTerm(event.target.value.toLowerCase());
+  };
+  
+  const filteredCategories = categories.filter(category =>
+    category.name.toLowerCase().includes(searchTerm)
+  );
 
   async function submitData(data) {
     if(imagesArray['length'] !== 1 && !selectedCategory.image ) return;
@@ -348,6 +360,8 @@ return categoryList;
                 className="form-control product-search ps-5"
                 id="input-search"
                 placeholder="Search Categories..."
+                value={searchTerm}
+                onChange={(e) => handleSearchChange(e) }
               />
               <i className="ti ti-search position-absolute top-50 start-0 translate-middle-y fs-6 text-dark ms-3"></i>
             </form>
@@ -404,7 +418,7 @@ return categoryList;
                 <th>Actions</th>
               </tr>
             </thead>
-            {!categories.length ? (
+            {!filteredCategories.length ? (
               <tbody>
                 <tr>
                 <td colSpan={12}>
@@ -422,7 +436,7 @@ return categoryList;
               </tbody>
       ) : (
         <tbody>
-        {categories.map((category,i) => (
+        {filteredCategories.map((category,i) => (
                 <tr className="search-items" key={i}>
                   <td>
                     <div className="n-chk align-self-center text-center">

@@ -40,6 +40,7 @@ function BannerPage() {
   const [imagePreviews, setImagePreviews] = useState(null);
   const [show, setShow] = useState(false);
   const [deleteBanner,setDeleteBanner] = useState('')
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleEditBanner = (bannerId) => {
     console.log("banner id",{bannerId})
@@ -59,7 +60,14 @@ function BannerPage() {
     setSelectedType(e.target.value);
   };
 
-
+  const handleSearchChange = (event) => {
+    console.log("entered")
+    setSearchTerm(event.target.value.toLowerCase());
+  };
+  
+  const filteredBanners = banners.filter(banner =>
+    banner.name.toLowerCase().includes(searchTerm)
+  );
   
 const bannersListFetch = async() => {
   const db = getFirestore(app)
@@ -365,6 +373,8 @@ return bannerList;
                 className="form-control product-search ps-5"
                 id="input-search"
                 placeholder="Search Banners..."
+                value={searchTerm}
+                onChange={(e) => handleSearchChange(e) }
               />
               <i className="ti ti-search position-absolute top-50 start-0 translate-middle-y fs-6 text-dark ms-3"></i>
             </form>
@@ -422,7 +432,7 @@ return bannerList;
                 <th>Actions</th>
               </tr>
             </thead>
-            {!banners.length ? (
+            {!filteredBanners.length ? (
               <tbody>
                 <tr>
                 <td colSpan={12}>
@@ -440,7 +450,7 @@ return bannerList;
               </tbody>
       ) : (
         <tbody>
-        {banners.map((banner,i) => (
+        {filteredBanners.map((banner,i) => (
                 <tr className="search-items" key={i}>
                   <td>
                     <div className="n-chk align-self-center text-center">

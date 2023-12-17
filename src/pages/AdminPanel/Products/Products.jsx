@@ -52,6 +52,8 @@ function Products() {
   const [show, setShow] = useState(false);
   const [deleteProduct,setDeleteProduct] = useState('')
   const [imagePreviews, setImagePreviews] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+
 
 
 
@@ -187,6 +189,21 @@ const fetchProductsAndCategories = async() => {
   }
 return products;
 };
+
+
+
+
+
+const handleSearchChange = (event) => {
+  console.log("entered")
+  setSearchTerm(event.target.value.toLowerCase());
+};
+
+const filteredProducts = products.filter(product =>
+  product.name.toLowerCase().includes(searchTerm)
+);
+
+
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
@@ -557,8 +574,8 @@ return products;
                 className="form-control product-search ps-5"
                 id="input-search"
                 placeholder="Search Products..."
-                // value={searchTerm}
-                // onChange={(e) => handleFilterChange }
+                value={searchTerm}
+                onChange={(e) => handleSearchChange(e) }
               />
               <i className="ti ti-search position-absolute top-50 start-0 translate-middle-y fs-6 text-dark ms-3"></i>
             </form>
@@ -617,7 +634,7 @@ return products;
                 <th>Actions</th>
               </tr>
             </thead>
-            {!products.length ? (
+            {!filteredProducts.length ? (
               <tbody>
                 <tr>
                 <td colSpan={12}>
@@ -635,7 +652,7 @@ return products;
               </tbody>
       ) : (
             <tbody>
-              {products.map((product,i) => (
+              {filteredProducts.map((product,i) => (
                 <tr className="search-items" key={i}>
                   <td>
                     <div className="n-chk align-self-center text-center">
