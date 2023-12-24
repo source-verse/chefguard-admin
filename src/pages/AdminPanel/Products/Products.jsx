@@ -12,6 +12,7 @@ import './Products.css'
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { useNavigate } from 'react-router-dom';
 import { MutatingDots } from 'react-loader-spinner';
+import { toast } from 'react-toastify';
 
 
 
@@ -44,7 +45,7 @@ function Products() {
 
   const [products, setProducts] = useState([]);
   const [modalShow, setModalShow] = React.useState(false);
-  // const [fourImagesSelected, setFourImagesSelected] = React.useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [imagesArray, setImagesArray] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -228,6 +229,7 @@ const filteredProducts = products.filter(product =>
     }
     console.log("first")
     if(!selectedCategory) return;
+    setIsLoading(true);
     data.features = additionalNames;
     data.categoryId = selectedCategory;
    
@@ -265,21 +267,25 @@ const filteredProducts = products.filter(product =>
 
         const docRef = await addDoc(collection(db, 'products'), data);
         // await setProducts(fetchProductsAndCategories())
-        
+        toast.success('Product created Successfully!');
         console.log({docRef})
-
+        
       }else{
-    const productRef = doc(db, "products", data.id);
-    console.log({productRef})
-      await updateDoc(productRef,data);
+        const productRef = doc(db, "products", data.id);
+        // console.log({productRef})
+        await updateDoc(productRef,data);
+        toast.success('Product created Successfully!');
       }
       const updatedProducts = await fetchProductsAndCategories();
         setProducts(updatedProducts);
         setModalShow(false);
         setSelectedProduct(productSchema);
-
+        setIsLoading(false);
+        
     } catch (error) {
-      console.error("Error while uploading images", error);
+      toast.error('Something went wrong while uploading the images!');
+        setIsLoading(false);
+        console.error("Error while uploading images", error);
     }
     
   }
@@ -343,6 +349,17 @@ const filteredProducts = products.filter(product =>
           {({ handleSubmit, handleChange, values, touched, errors }) => (
             <Form noValidate onSubmit={handleSubmit}>
               <Modal.Body>
+              {isLoading ? (
+              <MutatingDots
+              height="200"
+              width="80"
+              radius={9}
+              color="green"
+              ariaLabel="three-dots-loading"
+              wrapperStyle={{ /* additional wrapper styles */ }}
+              wrapperClass="additional-css-class"
+              />
+             ) : (
                 <Row className="mb-3">
                   <Form.Group as={Col} md="12" controlId="validationFormik01">
                     <span className='importantStar'>* </span>
@@ -525,6 +542,7 @@ const filteredProducts = products.filter(product =>
 
 
                 </Row>
+             )}
               </Modal.Body>
               <Modal.Footer>
                 <Button className='btn-success' type="submit">Create</Button>

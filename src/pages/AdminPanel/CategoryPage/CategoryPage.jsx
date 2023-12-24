@@ -11,6 +11,7 @@ import '../Products/Products.css'
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { MutatingDots } from 'react-loader-spinner';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 
 
@@ -166,10 +167,12 @@ return categoryList;
         delete data.id
         data.timestamp = serverTimestamp();
         await addDoc(collection(db, 'categories'), data);
+        toast.success('Category created Successfully!');
       }else{
         const categoriesRef = doc(db, "categories", data.id);
         console.log({categoriesRef})
         await updateDoc(categoriesRef,data);
+        toast.success('Category updated Successfully!');
       }
       const updatedCategories =await categoriesListFetch();
       setCategories(updatedCategories);
@@ -178,6 +181,8 @@ return categoryList;
       setIsLoading(false);
       
     } catch (error) {
+      toast.error('Something went wrong! Please try again later.');
+      setIsLoading(false);
       console.error("Error while uploading images", error);
     }
   }

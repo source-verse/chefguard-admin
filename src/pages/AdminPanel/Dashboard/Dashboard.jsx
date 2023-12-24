@@ -1,22 +1,69 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 // import DashboardCard from '../../../components/DashboardCard/DashboardCard';
 // import { Avatar, Grid, Paper, Stack, Typography } from '@mui/material';
 // import { Person as PersonIcon } from '@mui/icons-material';
 import ApexCharts from 'react-apexcharts';
+import { app } from '../../../firebase';
+import { collection, getDocs, getFirestore } from 'firebase/firestore';
+
+async function productFetch(){
+  const db = getFirestore(app)
+  const prod = await getDocs(collection(db, 'products'));
+  const cat = await getDocs(collection(db, 'categories'));
+  const productList = prod.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const categoryList = cat.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  let productsFinal = [];
+  for (const prodData of productList) {
+    if (prodData.categoryId) {
+      const categoryId = prodData.categoryId;
+      const catData = categoryList.find((cat) => cat.id && cat.id.toString() === categoryId.toString());
+      if (catData) {
+        productsFinal.push({ ...prodData, categoryName: catData.name });
+      } else {
+        productsFinal.push({ ...prodData, categoryName: '' });
+      }
+    }
+  }
+  return productsFinal
+}
+
+function countProductsByCategory(products) {
+  const categoryCounts = {};
+
+  products.forEach(product => {
+    const categoryId = product.categoryId;
+    const categoryName = product.categoryName;
+    if (categoryId) {
+      if (!categoryCounts[categoryId]) {
+        categoryCounts[categoryName] = 0;
+      }
+      categoryCounts[categoryName]++;
+    }
+  });
+  const categoryNames = Object.keys(categoryCounts);
+  const counts = Object.values(categoryCounts);
+  return {categoryNames,counts};
+}
+
+// productFetch()
 function Dashboard() {
- const [productCount,setproductCount] = useState(0)
+  const [products,setProducts] = useState([])
+  const [categoryData,setCategoryData] = useState([])
+  const [count,setCount] = useState([])
+    const [productCount,setproductCount] = useState(0);
+  
     const chartProductOptions = {
-        series: [38, 40, 25,10,15],
+        series: count,
         options: {
         chart: {
             type: 'donut',
         },
-        labels: ['Series 1', 'Series 2', 'Series 3','Series 4', 'Series 5'],
+        labels: categoryData,
         // colors: ['#5D87FF', '#ECF2FF', '#F9F9FD'],
         },
     }
     const chartEquityOptions = {
-        series: [38, 40, 25],
+        series: count,
         options: {
         chart: {
             type: 'donut',
@@ -25,6 +72,20 @@ function Dashboard() {
         // colors: ['#5D87FF', '#ECF2FF', '#F9F9FD'],
         },
     }
+    
+    useEffect(()=>{
+       productFetch().then((data)=>{
+        // console.log(JSON.stringify(data))
+        setProducts(data)
+        setproductCount(data.length);
+        let categoryCounts = countProductsByCategory(data);
+        console.log({categoryCounts});
+        setCategoryData(categoryCounts.categoryNames)
+        setCount(categoryCounts.counts)
+      }
+      );
+      // console.log(products)
+    },[])
 
   return(
     <div className='d-flex gap-5 col-lg-12 col-md-12 col-sm-6'>
@@ -40,7 +101,7 @@ function Dashboard() {
         </div>
         <div className="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-zow5z4-MuiGrid-root d-flex" style={{"justifyContent":"space-between"}}>
           <div className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-7 MuiGrid-grid-sm-7 css-uqwprf-MuiGrid-root">
-            <h3 className="MuiTypography-root MuiTypography-h3 css-ai2yoq-MuiTypography-root">{productCount || '-'}</h3>
+            <h3 className="MuiTypography-root MuiTypography-h3 css-ai2yoq-MuiTypography-root">{productCount}</h3>
             <div className="MuiStack-root css-8pheja-MuiStack-root">
               <div className="MuiAvatar-root MuiAvatar-circular MuiAvatar-colorDefault css-fh2vss-MuiAvatar-root">
                 <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-arrow-up-left" width="20" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="#39B69A" fill="none" strokeLinecap="round" strokeLinejoin="round">

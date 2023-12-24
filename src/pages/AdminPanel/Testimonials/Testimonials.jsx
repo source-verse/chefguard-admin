@@ -11,6 +11,7 @@ import '../Products/Products.css'
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { MutatingDots } from 'react-loader-spinner';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 
 
@@ -54,6 +55,7 @@ function Testimonials() {
     try {
       const testimonialsRef = doc(db, "testimonials", data.id);
       await updateDoc(testimonialsRef,data);
+      toast.success('Product created Successfully!');
     } catch (error) {
       console.error("update",error);
     }

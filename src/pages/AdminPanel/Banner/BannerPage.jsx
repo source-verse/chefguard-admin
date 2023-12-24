@@ -11,6 +11,7 @@ import '../Products/Products.css'
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { MutatingDots } from 'react-loader-spinner';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 
 
@@ -159,10 +160,12 @@ return bannerList;
         delete data.id
         data.timestamp = serverTimestamp();
         await addDoc(collection(db, 'banners'), data);
+        toast.success('Banner created Successfully!');
       }else{
         const bannersRef = doc(db, "banners", data.id);
         console.log({bannersRef})
         await updateDoc(bannersRef,data);
+        toast.success('Banner updated Successfully!');
       }
       const updatedbanners =await bannersListFetch();
       setBanners(updatedbanners);
@@ -171,6 +174,8 @@ return bannerList;
       setSelectedBanner(bannerSchema);
       
     } catch (error) {
+      setIsLoading(false);
+      toast.error('Something went wrong! Please try again later.');
       console.error("Error while uploading images", error);
     }
   }

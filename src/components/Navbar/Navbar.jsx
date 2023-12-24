@@ -1,13 +1,13 @@
 import React from 'react'
 import Sidebar from './Sidebar/Sidebar'
 import Header from './Header/Header'
-import Home from '../../pages/AdminPanel/Home'
 import Products from '../../pages/AdminPanel/Products/Products'
 import { Route, Routes } from 'react-router-dom'
 import CategoryPage from '../../pages/AdminPanel/CategoryPage/CategoryPage'
 import BannerPage from '../../pages/AdminPanel/Banner/BannerPage'
 import Dashboard from '../../pages/AdminPanel/Dashboard/Dashboard'
 import Testimonials from '../../pages/AdminPanel/Testimonials/Testimonials'
+import EmployeePage from '../../pages/AdminPanel/Employee/Employee'
 
 function MainLayout() {
   return (
@@ -32,6 +32,7 @@ function MainLayout() {
         <Route path='/categories' element={<CategoryPage />}></Route>
         <Route path='/banners' element={<BannerPage />}></Route>
         <Route path='/testimonials' element={<Testimonials />}></Route>
+        <Route path='/employees' element={<EmployeePage />}></Route>
         </Routes>
       </div>
     </div>

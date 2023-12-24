@@ -61,6 +61,14 @@ function Sidebar() {
                 <span className="hide-menu">Testimonials</span>
               </Link>
             </li>
+            <li className="sidebar-item">
+              <Link className="sidebar-link" to="/admin/employees">
+                <span>
+                  <i className="ti ti-user"></i>
+                </span>
+                <span className="hide-menu">Employees</span>
+              </Link>
+            </li>
             {/* <li className="sidebar-item">
               <a className="sidebar-link" href="#1" aria-expanded="false">
                 <span>
