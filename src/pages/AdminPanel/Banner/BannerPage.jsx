@@ -171,6 +171,7 @@ return bannerList;
       setBanners(updatedbanners);
       setIsLoading(false);
       setModalShow(false);
+      setImagePreviews([])
       setSelectedBanner(bannerSchema);
       
     } catch (error) {

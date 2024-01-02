@@ -5,8 +5,10 @@ import React, { useEffect, useState } from 'react';
 import ApexCharts from 'react-apexcharts';
 import { app } from '../../../firebase';
 import { collection, getDocs, getFirestore } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
 async function productFetch(){
+  
   const db = getFirestore(app)
   const prod = await getDocs(collection(db, 'products'));
   const cat = await getDocs(collection(db, 'categories'));
@@ -47,6 +49,7 @@ function countProductsByCategory(products) {
 
 // productFetch()
 function Dashboard() {
+  let navigate = useNavigate();
   const [products,setProducts] = useState([])
   const [categoryData,setCategoryData] = useState([])
   const [count,setCount] = useState([])
@@ -74,6 +77,11 @@ function Dashboard() {
     }
     
     useEffect(()=>{
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      if (!isLoggedIn) {
+        navigate('/login')
+        return;
+      }
        productFetch().then((data)=>{
         // console.log(JSON.stringify(data))
         setProducts(data)

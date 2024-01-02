@@ -40,7 +40,7 @@ function Products() {
     offer: yup.number(),
     stock: yup.number(),
     // images: yup.object().required("Please select 4 images."),
-    status: yup.string().required("Status is required."),
+    // status: yup.string().required("Status is required."),
   });
 
   const [products, setProducts] = useState([]);
@@ -50,6 +50,7 @@ function Products() {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [additionalNames, setAdditionalNames] = useState(['']);
+  const [selectedStatus, setSelectedStatus] = useState('');
   const [show, setShow] = useState(false);
   const [deleteProduct,setDeleteProduct] = useState('')
   const [imagePreviews, setImagePreviews] = useState(null);
@@ -68,6 +69,10 @@ function Products() {
     setDeleteProduct(productId)
     setShow(true);
   }
+  const handleStatusChange = (e) => {
+    console.log(e.target.value)
+    setSelectedStatus(e.target.value);
+  };
 
   const handleAddTextbox = () => {
     setAdditionalNames([...additionalNames, '']);
@@ -105,6 +110,7 @@ function Products() {
     );
     // console.log(products[index].additionalNames)
     if(products[index].features) setAdditionalNames(products[index].features);
+    setSelectedStatus(products[index].status)
     setSelectedCategory(products[index].categoryId)
     console.log(products[index])
 
@@ -113,10 +119,12 @@ function Products() {
   };
 
   const handleDeleteProduct = async() => {
+    console.log({deleteProduct})
     if(!deleteProduct) return;
-    const db = getFirestore(app)
+    const db = getFirestore(app);
     try{
-      await deleteDoc(doc(db, "products", deleteProduct ));
+      let data = await deleteDoc(doc(db, "products", deleteProduct ));
+      console.log({data})
       const updatedProducts = await fetchProductsAndCategories();
       setProducts(updatedProducts);
       setDeleteProduct('')
@@ -177,10 +185,11 @@ const fetchProductsAndCategories = async() => {
   let products = [];
 
   for (const prodData of productList) {
-    // console.log({prodData})
     if (prodData.categoryId) {
       const categoryId = prodData.categoryId;
-      const catData = categoryList.find((cat) => cat.id && cat.id.toString() === categoryId.toString());
+      const catData = categoryList.find((cat) =>{ 
+        return cat.id && (cat.id.toString() == categoryId.toString())
+      });
       if (catData) {
         products.push({ ...prodData, categoryName: catData.name });
       } else {
@@ -229,10 +238,11 @@ const filteredProducts = products.filter(product =>
     }
     console.log("first")
     if(!selectedCategory) return;
+    if(!selectedStatus) return;
     setIsLoading(true);
     data.features = additionalNames;
     data.categoryId = selectedCategory;
-   
+    data.status = selectedStatus;
   
     // data.images = [];
     const uploadPromises = [];
@@ -274,8 +284,11 @@ const filteredProducts = products.filter(product =>
         const productRef = doc(db, "products", data.id);
         // console.log({productRef})
         await updateDoc(productRef,data);
-        toast.success('Product created Successfully!');
+        toast.success('Product updated Successfully!');
       }
+      setSelectedCategory('');
+      setAdditionalNames([''])
+      setImagePreviews([])
       const updatedProducts = await fetchProductsAndCategories();
         setProducts(updatedProducts);
         setModalShow(false);
@@ -490,7 +503,7 @@ const filteredProducts = products.filter(product =>
                   </Form.Group>
 
 
-                  <Form.Group as={Col} md="6" controlId="validationFormik018" className='my-sm-2'>
+                  {/* <Form.Group as={Col} md="6" controlId="validationFormik018" className='my-sm-2'>
                   <span className='importantStar'>* </span>
                     <Form.Label> Status</Form.Label>
                     <Form.Control
@@ -501,6 +514,23 @@ const filteredProducts = products.filter(product =>
                       isValid={touched.status && !errors.status}
                       isInvalid={touched.status && !!errors.status}
                     />
+                    <Form.Control.Feedback type="invalid">{errors.status}</Form.Control.Feedback>
+                  </Form.Group> */}
+
+                  <Form.Group as={Col} md="6" controlId="validationFormik018" className='my-sm-2'>
+                    <span className='importantStar'>* </span>
+                    <Form.Label>Status</Form.Label>
+                    <Form.Select
+                      name="status"
+                      value={selectedStatus}
+                      onChange={handleStatusChange}
+                      isValid={touched.status && !errors.status}
+                      isInvalid={touched.status && !selectedStatus}
+                    >
+                      <option value="" disabled>Select</option>
+                        <option value='active' key='active'>Active</option>
+                        <option value='inactive' key='inactive'>Inactive</option>
+                    </Form.Select>
                     <Form.Control.Feedback type="invalid">{errors.status}</Form.Control.Feedback>
                   </Form.Group>
 
@@ -545,7 +575,7 @@ const filteredProducts = products.filter(product =>
              )}
               </Modal.Body>
               <Modal.Footer>
-                <Button className='btn-success' type="submit">Create</Button>
+                <Button className='btn-success' type="submit">{ !selectedProduct.id ?'Create': 'Save'}</Button>
                 <Button className='btn-danger' onClick={() => closeMainModal()}>Close</Button>
               </Modal.Footer>
             </Form>
@@ -600,12 +630,12 @@ const filteredProducts = products.filter(product =>
           </div>
           <div className="col-md-8 col-xl-9 text-end d-flex justify-content-md-end justify-content-center mt-3 mt-md-0">
             <div className="action-btn show-btn" style={{ display: 'none' }}>
-              <a
+              {/* <a
                 href=""
                 className="delete-multiple bg-danger-subtle btn me-2 text-danger d-flex align-items-center font-medium"
               >
                 <i className="ti ti-trash text-danger me-1 fs-5"></i> Delete All
-              </a>
+              </a> */}
             </div>
             <button id="btn-add-contact" className="btn btn-info d-flex align-items-center" onClick={() => setModalShow(true)} >
               <i className="ti ti-shopping-cart text-white me-1 fs-5"></i> Add Product
@@ -712,9 +742,8 @@ const filteredProducts = products.filter(product =>
                     {/* Assuming contact has a 'phone' property */}
                     {product.stock}
                   </td>
-                  <td className='badge bg-primary-subtle rounded-3 py-8 text-primary fw-semibold fs-2'>
-                    {/* Assuming contact has a 'phone' property */}
-                    {product.status}
+                  <td className={product.status === 'active' ? 'badge bg-primary-subtle rounded-3 py-8 text-primary fw-semibold fs-2' : 'badge bg-danger rounded-3 py-8 text-white fw-semibold fs-2'}>
+                    {product.status || '-'}
                   </td>
                   <td>
                     <div className="action-btn" style={{ 'display': 'flex' }}>

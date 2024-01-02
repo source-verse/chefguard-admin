@@ -174,13 +174,15 @@ return categoryList;
         await updateDoc(categoriesRef,data);
         toast.success('Category updated Successfully!');
       }
+      setImagePreviews([])
+      setSelectedCategory(categorySchema);
       const updatedCategories =await categoriesListFetch();
       setCategories(updatedCategories);
       setModalShow(false);
-      setSelectedCategory(categorySchema);
       setIsLoading(false);
       
     } catch (error) {
+      setImagePreviews([])
       toast.error('Something went wrong! Please try again later.');
       setIsLoading(false);
       console.error("Error while uploading images", error);
@@ -287,7 +289,7 @@ return categoryList;
 
                   <Form.Group as={Col} md="12" controlId="validationFormikFile" className='my-sm-2'>
                     <span className='importantStar'>* </span>
-                    <Form.Label>Upload a Image</Form.Label>
+                    <Form.Label>Upload a Logo</Form.Label>
                     <Form.Control
                       type="file"
                       name="image"
