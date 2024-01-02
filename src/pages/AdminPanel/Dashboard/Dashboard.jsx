@@ -62,6 +62,15 @@ function Dashboard() {
             type: 'donut',
         },
         labels: categoryData,
+        legend: {
+                  show: true,
+                  formatter: function(seriesName, opts) {
+                    const maxLength = 10; // Maximum length of text after which ellipsis will be added
+                    return seriesName.length > maxLength ? 
+                           seriesName.substring(0, maxLength) + '...' : 
+                           seriesName;
+                  },
+        },
         // colors: ['#5D87FF', '#ECF2FF', '#F9F9FD'],
         },
     }
