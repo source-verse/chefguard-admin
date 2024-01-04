@@ -1,10 +1,10 @@
-import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 
 function Header() {
   const navigate = useNavigate();
   const remove = function(){
     localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('activeLink');
     navigate('/login');
   }
   return (
