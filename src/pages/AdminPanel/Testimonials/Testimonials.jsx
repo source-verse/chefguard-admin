@@ -20,11 +20,13 @@ function Testimonials() {
   const navigate = useNavigate();
   let testimonialSchema ={
     id:'',
+    name:'',
     message:'',
 
   }
   const { Formik } = formik;
   const schema = yup.object().shape({
+    name: yup.string().required('name is required.'),
     message: yup.string().required('message is required.'),
   });
   const [modalShow, setModalShow] = React.useState(false);
@@ -101,9 +103,11 @@ function Testimonials() {
           }}
           initialValues={
             selectedTestimonials ? {
+              name: selectedTestimonials.name || '',
               message: selectedTestimonials.message || '',
             }
           : {
+            name: '',
             message: '',
             }
         }
@@ -123,6 +127,23 @@ function Testimonials() {
               />
              ) : (
                 <Row className="mb-3">
+
+                    <Form.Group as={Col} md="12" controlId="validationFormik019" className='my-sm-2'>
+                      <span className="importantStar">* </span>
+                      <Form.Label>Name</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="name"
+                        value={values.name}
+                        onChange={handleChange}
+                        isValid={touched.name && !errors.name}
+                        isInvalid={touched.name && !!errors.name}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {errors.name}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+
                   <Form.Group as={Col} md="12" controlId="validationFormik013" className='my-sm-2'>
                     <div style={{'display':'flex', 'justifyContent':'space-between'}}>
                         <div>
