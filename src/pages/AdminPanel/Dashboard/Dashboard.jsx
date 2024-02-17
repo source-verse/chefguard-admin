@@ -1,38 +1,44 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 // import DashboardCard from '../../../components/DashboardCard/DashboardCard';
 // import { Avatar, Grid, Paper, Stack, Typography } from '@mui/material';
 // import { Person as PersonIcon } from '@mui/icons-material';
-import ApexCharts from 'react-apexcharts';
-import { app } from '../../../firebase';
-import { collection, getDocs, getFirestore } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom';
+import ApexCharts from "react-apexcharts";
+import { app } from "../../../firebase";
+import { collection, getDocs, getFirestore } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
-async function productFetch(){
-  
-  const db = getFirestore(app)
-  const prod = await getDocs(collection(db, 'products'));
-  const cat = await getDocs(collection(db, 'categories'));
-  const productList = prod.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  const categoryList = cat.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+async function productFetch() {
+  const db = getFirestore(app);
+  const prod = await getDocs(collection(db, "products"));
+  const cat = await getDocs(collection(db, "categories"));
+  const newsletters = await getDocs(collection(db, "newsLetter"));
+  const productList = prod.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  const categoryList = cat.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  const newslettersList = newsletters.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
   let productsFinal = [];
   for (const prodData of productList) {
     if (prodData.categoryId) {
       const categoryId = prodData.categoryId;
-      const catData = categoryList.find((cat) => cat.id && cat.id.toString() === categoryId.toString());
+      const catData = categoryList.find(
+        (cat) => cat.id && cat.id.toString() === categoryId.toString()
+      );
       if (catData) {
         productsFinal.push({ ...prodData, categoryName: catData.name });
       } else {
-        productsFinal.push({ ...prodData, categoryName: '' });
+        productsFinal.push({ ...prodData, categoryName: "" });
       }
     }
   }
-  return productsFinal
+  return { productsFinal, newslettersList };
 }
 
 function countProductsByCategory(products) {
   const categoryCounts = {};
 
-  products.forEach(product => {
+  products.forEach((product) => {
     const categoryId = product.categoryId;
     const categoryName = product.categoryName;
     if (categoryId) {
@@ -44,161 +50,213 @@ function countProductsByCategory(products) {
   });
   const categoryNames = Object.keys(categoryCounts);
   const counts = Object.values(categoryCounts);
-  return {categoryNames,counts};
+  return { categoryNames, counts };
 }
 
 // productFetch()
 function Dashboard() {
   let navigate = useNavigate();
-  const [products,setProducts] = useState([])
-  const [categoryData,setCategoryData] = useState([])
-  const [count,setCount] = useState([])
-    const [productCount,setproductCount] = useState(0);
-  
-    const chartProductOptions = {
-        series: count,
-        options: {
-        chart: {
-            type: 'donut',
-        },
-        labels: categoryData,
-        legend: {
-                  show: true,
-                  formatter: function(seriesName, opts) {
-                    const maxLength = 10; // Maximum length of text after which ellipsis will be added
-                    return seriesName.length > maxLength ? 
-                           seriesName.substring(0, maxLength) + '...' : 
-                           seriesName;
-                  },
-        },
-        // colors: ['#5D87FF', '#ECF2FF', '#F9F9FD'],
-        },
-    }
-    const chartEquityOptions = {
-        series: count,
-        options: {
-        chart: {
-            type: 'donut',
-        },
-        labels: ['Series 1', 'Series 2', 'Series 3'],
-        // colors: ['#5D87FF', '#ECF2FF', '#F9F9FD'],
-        },
-    }
-    
-    useEffect(()=>{
-      const isLoggedIn = localStorage.getItem('isLoggedIn');
-      if (!isLoggedIn) {
-        navigate('/login')
-        return;
-      }
-       productFetch().then((data)=>{
-        // console.log(JSON.stringify(data))
-        setProducts(data)
-        setproductCount(data.length);
-        let categoryCounts = countProductsByCategory(data);
-        console.log({categoryCounts});
-        setCategoryData(categoryCounts.categoryNames)
-        setCount(categoryCounts.counts)
-      }
-      );
-      // console.log(products)
-    },[])
+  const [products, setProducts] = useState([]);
+  const [categoryData, setCategoryData] = useState([]);
+  const [count, setCount] = useState([]);
+  const [productCount, setproductCount] = useState(0);
+  const [newslettersCount, setNewslettersCount] = useState(0);
 
-  return(
-    <div className='d-flex gap-5 col-lg-12 col-md-12 col-sm-6'>
-    <div className='col-lg-6 col-md-12 col-sm-12 card card-body'>
-    <div className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root">
-    <div className="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation9 MuiCard-root css-ydfexc-MuiPaper-root-MuiCard-root">
-      <div className="MuiCardContent-root css-16iq3h-MuiCardContent-root">
-        <div className="MuiStack-root css-1s09o1t-MuiStack-root">
-          <div className="MuiBox-root css-0">
-            <h5 className="MuiTypography-root MuiTypography-h5 css-76dl6-MuiTypography-root" style={{"color": "#2A3547",
-    "fontWeight": "600"}}>Products</h5>
+  const chartProductOptions = {
+    series: count,
+    options: {
+      chart: {
+        type: "donut",
+      },
+      labels: categoryData,
+      legend: {
+        show: true,
+        formatter: function (seriesName, opts) {
+          const maxLength = 10; // Maximum length of text after which ellipsis will be added
+          return seriesName.length > maxLength
+            ? seriesName.substring(0, maxLength) + "..."
+            : seriesName;
+        },
+      },
+      // colors: ['#5D87FF', '#ECF2FF', '#F9F9FD'],
+    },
+  };
+  const chartEquityOptions = {
+    series: count,
+    options: {
+      chart: {
+        type: "donut",
+      },
+      labels: ["Series 1", "Series 2", "Series 3"],
+      // colors: ['#5D87FF', '#ECF2FF', '#F9F9FD'],
+    },
+  };
+
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    if (!isLoggedIn) {
+      navigate("/login");
+      return;
+    }
+    productFetch().then(({ productsFinal, newslettersList }) => {
+      console.log(JSON.stringify(productsFinal));
+      setProducts(productsFinal);
+      setproductCount(productsFinal.length);
+      let categoryCounts = countProductsByCategory(productsFinal);
+      console.log({ categoryCounts });
+      setCategoryData(categoryCounts.categoryNames);
+      setCount(categoryCounts.counts);
+      var uniqueCount = new Set(newslettersList.map(item => item.email)).size;
+      setNewslettersCount(uniqueCount);
+    });
+    // console.log(products)
+  }, []);
+
+  return (
+    <div className="d-flex gap-5 col-lg-12 col-md-12 col-sm-6">
+      <div className="col-lg-6 col-md-12 col-sm-12 card card-body">
+        <div className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root">
+          <div className="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation9 MuiCard-root css-ydfexc-MuiPaper-root-MuiCard-root">
+            <div className="MuiCardContent-root css-16iq3h-MuiCardContent-root">
+              <div className="MuiStack-root css-1s09o1t-MuiStack-root">
+                <div className="MuiBox-root css-0">
+                  <h5
+                    className="MuiTypography-root MuiTypography-h5 css-76dl6-MuiTypography-root"
+                    style={{ color: "#2A3547", fontWeight: "600" }}
+                  >
+                    Products
+                  </h5>
+                </div>
+              </div>
+              <div
+                className="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-zow5z4-MuiGrid-root d-flex"
+                style={{ justifyContent: "space-between" }}
+              >
+                <div className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-7 MuiGrid-grid-sm-7 css-uqwprf-MuiGrid-root">
+                  <h3 className="MuiTypography-root MuiTypography-h3 css-ai2yoq-MuiTypography-root">
+                    {productCount}
+                  </h3>
+                  <div className="MuiStack-root css-8pheja-MuiStack-root">
+                    <div className="MuiAvatar-root MuiAvatar-circular MuiAvatar-colorDefault css-fh2vss-MuiAvatar-root">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="icon icon-tabler icon-tabler-arrow-up-left"
+                        width="20"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        strokeWidth="2"
+                        stroke="#39B69A"
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path stroke="none" d="M0 0h24v24H0z"></path>
+                        <line x1="7" y1="7" x2="17" y2="17"></line>
+                        <polyline points="16 7 7 7 7 16"></polyline>
+                      </svg>
+                      <span
+                        className="MuiTypography-root MuiTypography-subtitle2 css-o2z8bd-MuiTypography-root"
+                        style={{ marginRight: "10px" }}
+                      >
+                        +{" -"}
+                      </span>
+                      <span className="MuiTypography-root MuiTypography-subtitle2 css-u9bpq6-MuiTypography-root">
+                        last year
+                      </span>
+                    </div>
+
+                    {/* <h6 ></h6> */}
+                  </div>
+                </div>
+                <div className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-5 MuiGrid-grid-sm-5 css-k3f0g4-MuiGrid-root">
+                  {/* Donut Chart Code Goes Here */}
+                  <ApexCharts
+                    options={chartProductOptions.options}
+                    series={chartProductOptions.series}
+                    type={chartProductOptions.options.chart.type}
+                    height="150"
+                    width="100%"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-zow5z4-MuiGrid-root d-flex" style={{"justifyContent":"space-between"}}>
-          <div className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-7 MuiGrid-grid-sm-7 css-uqwprf-MuiGrid-root">
-            <h3 className="MuiTypography-root MuiTypography-h3 css-ai2yoq-MuiTypography-root">{productCount}</h3>
-            <div className="MuiStack-root css-8pheja-MuiStack-root">
-              <div className="MuiAvatar-root MuiAvatar-circular MuiAvatar-colorDefault css-fh2vss-MuiAvatar-root">
-                <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-arrow-up-left" width="20" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="#39B69A" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z"></path>
-                  <line x1="7" y1="7" x2="17" y2="17"></line>
-                  <polyline points="16 7 7 7 7 16"></polyline>
-                </svg>
-              <span className="MuiTypography-root MuiTypography-subtitle2 css-o2z8bd-MuiTypography-root" style={{'marginRight':"10px"}}>+{' -'}</span>
-              <span className="MuiTypography-root MuiTypography-subtitle2 css-u9bpq6-MuiTypography-root">last year</span>
+      </div>
+      <div className="col-lg-6 col-md-12 col-sm-12 card card-body">
+        <div className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root">
+          <div className="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation9 MuiCard-root css-ydfexc-MuiPaper-root-MuiCard-root">
+            <div className="MuiCardContent-root css-16iq3h-MuiCardContent-root">
+              <div className="MuiStack-root css-1s09o1t-MuiStack-root">
+                <div className="MuiBox-root css-0">
+                  <h5
+                    className="MuiTypography-root MuiTypography-h5 css-76dl6-MuiTypography-root"
+                    style={{ color: "#2A3547", fontWeight: "600" }}
+                  >
+                    Equity
+                  </h5>
+                </div>
               </div>
+              <div
+                className="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-zow5z4-MuiGrid-root d-flex"
+                style={{ justifyContent: "space-between" }}
+              >
+                <div className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-7 MuiGrid-grid-sm-7 css-uqwprf-MuiGrid-root">
+                  <h3 className="MuiTypography-root MuiTypography-h3 css-ai2yoq-MuiTypography-root">
+                  {newslettersCount}
+                  </h3>
+                  <div className="MuiStack-root css-8pheja-MuiStack-root">
+                    <div className="MuiAvatar-root MuiAvatar-circular MuiAvatar-colorDefault css-fh2vss-MuiAvatar-root">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="icon icon-tabler icon-tabler-arrow-up-left"
+                        width="20"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        strokeWidth="2"
+                        stroke="#39B69A"
+                        fill="none"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path stroke="none" d="M0 0h24v24H0z"></path>
+                        <line x1="7" y1="7" x2="17" y2="17"></line>
+                        <polyline points="16 7 7 7 7 16"></polyline>
+                      </svg>
+                      <span
+                        className="MuiTypography-root MuiTypography-subtitle2 css-o2z8bd-MuiTypography-root"
+                        style={{ marginRight: "10px" }}
+                      >
+                        +0%
+                      </span>
+                      <span className="MuiTypography-root MuiTypography-subtitle2 css-u9bpq6-MuiTypography-root">
+                        last year
+                      </span>
+                    </div>
 
-              {/* <h6 ></h6> */}
+                    {/* <h6 ></h6> */}
+                  </div>
+                </div>
+                <div className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-5 MuiGrid-grid-sm-5 css-k3f0g4-MuiGrid-root">
+                  {/* Donut Chart Code Goes Here */}
+                  <ApexCharts
+                    options={chartEquityOptions.options}
+                    series={chartEquityOptions.series}
+                    type={chartEquityOptions.options.chart.type}
+                    height="150"
+                    width="100%"
+                  />
+                </div>
+              </div>
             </div>
-            
-          </div>
-          <div className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-5 MuiGrid-grid-sm-5 css-k3f0g4-MuiGrid-root">
-            {/* Donut Chart Code Goes Here */}
-            <ApexCharts
-            options={chartProductOptions.options}
-            series={chartProductOptions.series}
-            type={chartProductOptions.options.chart.type}
-            height="150"
-            width="100%"
-            />
           </div>
         </div>
       </div>
     </div>
-  </div>
-    </div>
-    <div className='col-lg-6 col-md-12 col-sm-12 card card-body'>
-    <div className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 css-1idn90j-MuiGrid-root">
-    <div className="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation9 MuiCard-root css-ydfexc-MuiPaper-root-MuiCard-root">
-      <div className="MuiCardContent-root css-16iq3h-MuiCardContent-root">
-        <div className="MuiStack-root css-1s09o1t-MuiStack-root">
-          <div className="MuiBox-root css-0">
-            <h5 className="MuiTypography-root MuiTypography-h5 css-76dl6-MuiTypography-root" style={{"color": "#2A3547",
-    "fontWeight": "600"}}>Equity</h5>
-          </div>
-        </div>
-        <div className="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-3 css-zow5z4-MuiGrid-root d-flex" style={{"justifyContent":"space-between"}}>
-          <div className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-7 MuiGrid-grid-sm-7 css-uqwprf-MuiGrid-root">
-            <h3 className="MuiTypography-root MuiTypography-h3 css-ai2yoq-MuiTypography-root">-</h3>
-            <div className="MuiStack-root css-8pheja-MuiStack-root">
-              <div className="MuiAvatar-root MuiAvatar-circular MuiAvatar-colorDefault css-fh2vss-MuiAvatar-root">
-                <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-arrow-up-left" width="20" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="#39B69A" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z"></path>
-                  <line x1="7" y1="7" x2="17" y2="17"></line>
-                  <polyline points="16 7 7 7 7 16"></polyline>
-                </svg>
-              <span className="MuiTypography-root MuiTypography-subtitle2 css-o2z8bd-MuiTypography-root" style={{'marginRight':"10px"}}>+0%</span>
-              <span className="MuiTypography-root MuiTypography-subtitle2 css-u9bpq6-MuiTypography-root">last year</span>
-              </div>
-
-              {/* <h6 ></h6> */}
-            </div>
-            
-          </div>
-          <div className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-5 MuiGrid-grid-sm-5 css-k3f0g4-MuiGrid-root">
-            {/* Donut Chart Code Goes Here */}
-            <ApexCharts
-            options={chartEquityOptions.options}
-            series={chartEquityOptions.series}
-            type={chartEquityOptions.options.chart.type}
-            height="150"
-            width="100%"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-    </div>
-
-    </div>
-  )
+  );
 }
 
-export default Dashboard
-
+export default Dashboard;
 
 // import React from 'react'
 
@@ -206,7 +264,7 @@ export default Dashboard
 //   return (
 //     <>
 //     <div className="row">
-              
+
 //               <div className="col-lg-12">
 //                 <div className="row">
 //                   <div className="col-lg-12 col-md-6">

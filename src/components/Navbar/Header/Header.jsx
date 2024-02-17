@@ -28,7 +28,8 @@ function Header() {
               {/* <a href="https://adminmart.com/product/modernize-free-bootstrap-admin-dashboard/" target="_blank" className="btn btn-primary">Download Free</a> */}
               <li className="nav-item dropdown">
                 <a className="nav-link nav-icon-hover" id="drop2" data-bs-toggle="dropdown"
-                  aria-expanded="false">
+                  aria-expanded="true">
+                    
                   <img src="https://bootstrapdemos.adminmart.com/modernize/dist/assets/images/profile/user-1.jpg" alt="" width="35" height="35" className="rounded-circle" />
                 </a>
                 <div className="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
