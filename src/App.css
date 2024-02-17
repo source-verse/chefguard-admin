@@ -42,17 +42,23 @@
 } */
 
 
-.modal-content{
+.modal-content {
   /* max-height: 100%; */
   overflow-y: auto !important;
 }
 
-.importantStar{
+.importantStar {
   color: red;
 }
 
-.btn-red{
-    color: #fff;
-    background-color: #dc3545;
-    border-color: #dc3545;
+.btn-red {
+  color: #fff;
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+
+.navbar-nav .show .dropdown-menu {
+  display: block;
+  right: 0;
 }
